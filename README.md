@@ -6,7 +6,24 @@ FERNANDO REVILLA
 
 SISTEMA RECONOCIMIENTO FACIAS USANDO ANALISIS DE COMPONENTES PRINCIPALES
 
+Objetivos:
+
+    conseguir 5 fotos por "persona"
+
+    procesar las fotos a informacion que pueda ser utilizada por el sistema (automaticamente?)
+
+    transformacion de imagenes a matrices
+
+    analisis de componentes y proyecciones
+
+    clasificación de imagenes (pruebas de que funciona, automatizado?)
+
+
+
+
+
 Pasos propuestos:
+
     Recolección de datos
 
         Reunir carpetas por identidad: data/person1/*.jpg, data/person2/*.jpg, ...
