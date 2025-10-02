@@ -88,35 +88,18 @@ def matriz_svd(matriz):
 
     print("Matriz original:")
     print(A)
+    #VECTORES PROPIOS
     print("\nMatriz U:")
     print(U)
+    #VALORES SINGULARES
     print("\nMatriz Σ (valores singulares):")
     print(Sigma)
+    #ORIGINAL X TRANSPUESTA
     print("\nMatriz V^T:")
     print(VT)
 
     # Retornamos las tres matrices
     return U, Sigma, VT
-
-
-def normalizar_matriz(matriz):
-    # Convertimos la matriz a numpy
-    A = np.array(matriz, dtype=float)
-
-    # Calculamos el valor mínimo y máximo
-    min_val = A.min()
-    max_val = A.max()
-
-    # Normalizamos
-    A_norm = (A - min_val) / (max_val - min_val)
-
-    print("Matriz original:")
-    print(A)
-    print("\n Matriz normalizada:")
-    print(A_norm)
-
-    return A_norm
-
 
 # Funcion principal donde se lamman a todas las funciones de
 # procesamiento de imagenes (regresa la componente principal)
@@ -140,15 +123,9 @@ def main():
             matrix[i, :] = row
             i = i + 1
 
-            # Mandar todas las matrices al algoritmo de SVD
-
-    print(matrix)
-
-    # Normalizar la matriz antes de hacer el SVD
-    matriz_normalizada = normalizar_matriz(matrix)
-
-    # Invocamos la funcion para el SVD
-    matriz_svd(matriz_normalizada)
+    # Mandar todas las matrices al algoritmo de SVD
+    print ("SVD-----------------------------------------")
+    matriz_svd(matrix)
 
 
 if __name__ == "__main__":
