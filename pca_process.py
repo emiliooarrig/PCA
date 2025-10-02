@@ -34,6 +34,7 @@ import numpy as np
 import cv2
 import os
 
+#Normaliza las imagenes a escala de grises
 def normalizar(filename):
     # Input & output
     input_path = os.path.join("data", filename)
@@ -48,17 +49,13 @@ def normalizar(filename):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray_resized = cv2.resize(gray, (60, 90))
 
-    # Genera el nombre con "_norm.png"
-    base, ext = os.path.splitext(filename)  
-    output_filename = base + "_norm.png"   
-    output_path = os.path.join("normalized_data", output_filename)
-
     # Checa si el folder existe y guarda la imagen
     os.makedirs("normalized_data", exist_ok=True)
     cv2.imwrite(output_path, gray_resized)
 
     print(f"Imagen normalizada guardada en {output_path}")
 
+#Pasa las imagenes grises a matriz numpy
 def imag_Matriz(filename):
     # Ruta de la imagen normalizada
     input_path = os.path.join("normalized_data", filename)
@@ -73,12 +70,23 @@ def imag_Matriz(filename):
     matrix = img.astype(np.float32) / 255.0
 
     print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
-    print (matrix)
     return matrix
 
+#Procesa las matrices (lista de matrices) a 1 sola matriz
+
+#Funcion principal donde se lamman a todas las funciones de procesamiento de imagenes (regresa la componente principal de la persona)
 def main():
-    normalizar("t1.png") #normaliza la imagen a gris
-    imag_Matriz("t1_norm.png")
+    rang= len(os.listdir("data"))
+    img= 60*90
+
+    matrix = np.zeros((rang, img), dtype=np.float32)
+
+    for filename in os.listdir("data"):
+        # Skip non-image files
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+            print(f"Processing {filename} ...")
+            normalizar(filename) #normaliza la imagen a gris
+            imag_Matriz(filename)# pasa la imagen gris a matriz (lo puedes imprimir o guardar en una variable)
 
 
 if __name__ == "__main__":
