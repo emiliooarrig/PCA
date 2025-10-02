@@ -70,9 +70,15 @@ def imag_Matriz(filename):
     print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
     return matrix
 
+
 def main():
-    normalizar("t1.png") #normaliza la imagen a gris
-    imag_Matriz("t1.png")# pasa la imagen gris a matriz (lo puedes imprimir o guardar en una variable)
+    
+    for filename in os.listdir("data"):
+        # Skip non-image files
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+            print(f"Processing {filename} ...")
+            normalizar(filename) #normaliza la imagen a gris
+            imag_Matriz(filename)# pasa la imagen gris a matriz (lo puedes imprimir o guardar en una variable)
 
 
 if __name__ == "__main__":
