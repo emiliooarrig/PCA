@@ -72,9 +72,8 @@ def imag_Matriz(filename):
     print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
     return matrix
 
-#Procesa las matrices (lista de matrices) a 1 sola matriz
-
-#Funcion principal donde se lamman a todas las funciones de procesamiento de imagenes (regresa la componente principal de la persona)
+#Funcion principal donde se lamman a todas las funciones de 
+# procesamiento de imagenes (regresa la componente principal)
 def main():
     rang= len(os.listdir("data"))
     img= 60*90
@@ -89,16 +88,13 @@ def main():
             print(f"Processing {filename} ...")
             normalizar(filename) #normaliza la imagen a gris
 
-            #prepara las matrices para ser procesadas
-            row = imag_Matriz(filename).flatten()# pasa la imagen gris a matriz y lo convierte en fila de la matriz de "persona"
+            # prepara las matrices para ser procesadas
+            # pasa la imagen gris a matriz y lo convierte en fila de la matriz de "persona"
+            row = imag_Matriz(filename).flatten()
             matrix[i, :] = row  
             i=i+1 
     print(matrix)
     
-
-
-
-
 if __name__ == "__main__":
     main()
 
