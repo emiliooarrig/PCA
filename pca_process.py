@@ -103,14 +103,15 @@ def matriz_svd(matriz):
 
 # Funcion principal donde se lamman a todas las funciones de
 # procesamiento de imagenes (regresa la componente principal)
-def main():
-    rang = len(os.listdir("data"))
+def proc_matrix(folder):
+    
+    rang = len(os.listdir(folder))
     img = 60 * 90
 
     # Preallocate empty matrix
     matrix = np.zeros((rang, img), dtype=np.float32)
     i = 0
-    for filename in os.listdir("data"):
+    for filename in os.listdir(folder):
 
         # Skip non-image files
         if filename.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
@@ -132,7 +133,7 @@ def main():
     proy=np.dot(matrix_centered, vt[:k, :].T)
     print("PROYECCION")
     print (proy)
-    
-
-if __name__ == "__main__":
-    main()
+    pc1 = proy[0, :]  # vector de tamaño (n_muestras,)
+    print("PRINCIPAL")
+    print(pc1)
+    return pc1
