@@ -48,11 +48,6 @@ def normalizar(filename):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray_resized = cv2.resize(gray, (60, 90))
 
-    # Genera el nombre con "_norm.png"
-    base, ext = os.path.splitext(filename)  
-    output_filename = base + "_norm.png"   
-    output_path = os.path.join("normalized_data", output_filename)
-
     # Checa si el folder existe y guarda la imagen
     os.makedirs("normalized_data", exist_ok=True)
     cv2.imwrite(output_path, gray_resized)
@@ -73,12 +68,11 @@ def imag_Matriz(filename):
     matrix = img.astype(np.float32) / 255.0
 
     print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
-    print (matrix)
     return matrix
 
 def main():
     normalizar("t1.png") #normaliza la imagen a gris
-    imag_Matriz("t1_norm.png")
+    imag_Matriz("t1.png")# pasa la imagen gris a matriz (lo puedes imprimir o guardar en una variable)
 
 
 if __name__ == "__main__":
