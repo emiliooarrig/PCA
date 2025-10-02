@@ -16,8 +16,15 @@ import os
 
 import pca_process as pca
 
+def borrar_normdata(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        if os.path.isfile(file_path):  # make sure it's a file
+            os.remove(file_path)
+
 def main():
     print("TRAINING MODEL")
+    borrar_normdata("normalized_data")
     pca.proc_matrix("data")
 
 if __name__ == "__main__":
