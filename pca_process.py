@@ -122,7 +122,8 @@ def main():
             
 
     print(matrix)
-    matriz_svd(matrix)
+    print (matriz_svd(matrix))
+    
 
 
 
