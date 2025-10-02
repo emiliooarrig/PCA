@@ -125,8 +125,14 @@ def main():
 
     # Mandar todas las matrices al algoritmo de SVD
     print ("SVD-----------------------------------------")
-    matriz_svd(matrix)
-
+    u,sig,vt=matriz_svd(matrix) #ahora podemos usar "svd para conseguir u, sigma y/o vt usando svd(#)"
+    matrix_centered = matrix - np.mean(matrix, axis=0)
+    #proyeciones principales (producto punto de matrix*s)= vector resultante que se regresa.
+    k=5
+    proy=np.dot(matrix_centered, vt[:k, :].T)
+    print("PROYECCION")
+    print (proy)
+    
 
 if __name__ == "__main__":
     main()
