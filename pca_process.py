@@ -72,6 +72,30 @@ def imag_Matriz(filename):
     print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
     return matrix
 
+def matriz_svd(matriz):
+    # Convertimos la matriz a un arreglo numpy
+    A = np.array(matriz)
+    
+    # Aplicamos SVD
+    U, S, VT = np.linalg.svd(A)
+    
+    # S contiene solo los valores singulares, no la matriz diagonal completa
+    # Para convertirlo a una matriz diagonal del mismo tamaño que A:
+    Sigma = np.zeros((A.shape[0], A.shape[1]))
+    np.fill_diagonal(Sigma, S)
+    
+    print("Matriz original:")
+    print(A)
+    print("\nMatriz U:")
+    print(U)
+    print("\nMatriz Σ (valores singulares):")
+    print(Sigma)
+    print("\nMatriz V^T:")
+    print(VT)
+    
+    # Retornamos las tres matrices
+    return U, Sigma, VT
+
 #Procesa las matrices (lista de matrices) a 1 sola matriz
 
 #Funcion principal donde se lamman a todas las funciones de procesamiento de imagenes (regresa la componente principal de la persona)
@@ -93,8 +117,13 @@ def main():
             row = imag_Matriz(filename).flatten()# pasa la imagen gris a matriz y lo convierte en fila de la matriz de "persona"
             matrix[i, :] = row  
             i=i+1 
+
+            # Mandar todas las matrices al algoritmo de SVD
+            
+
     print(matrix)
-    
+    matriz_svd(matrix)
+
 
 
 
