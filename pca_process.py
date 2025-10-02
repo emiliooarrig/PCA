@@ -79,14 +79,23 @@ def main():
     rang= len(os.listdir("data"))
     img= 60*90
 
+    # Preallocate empty matrix
     matrix = np.zeros((rang, img), dtype=np.float32)
-
+    i=0
     for filename in os.listdir("data"):
+
         # Skip non-image files
         if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
             print(f"Processing {filename} ...")
             normalizar(filename) #normaliza la imagen a gris
-            imag_Matriz(filename)# pasa la imagen gris a matriz (lo puedes imprimir o guardar en una variable)
+
+            #prepara las matrices para ser procesadas
+            row = imag_Matriz(filename).flatten()# pasa la imagen gris a matriz y lo convierte en fila de la matriz de "persona"
+            matrix[i, :] = row  
+            i=i+1 
+    print(matrix)
+    
+
 
 
 if __name__ == "__main__":
