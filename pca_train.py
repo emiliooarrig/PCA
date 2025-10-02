@@ -17,8 +17,8 @@ import os
 import pca_process as pca
 
 def main():
-    print("hello world!")
+    print("TRAINING MODEL")
     pca.proc_matrix("data")
-    
+
 if __name__ == "__main__":
     main()
