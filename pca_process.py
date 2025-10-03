@@ -101,6 +101,7 @@ def matriz_svd(matriz):
     # Retornamos las tres matrices
     return U, Sigma, VT
 
+
 # Funcion principal donde se lamman a todas las funciones de
 # procesamiento de imagenes (regresa la componente principal)
 def proc_matrix(folder):
@@ -137,3 +138,164 @@ def proc_matrix(folder):
     print("PRINCIPAL")
     print(pc1)
     return pc1
+
+
+# ============================================================================
+# NUEVAS FUNCIONES PARA ENTRENAMIENTO Y PRUEBA
+# ============================================================================
+
+# Funcion de entrenamiento: procesa 5 imagenes de entrenamiento
+# y regresa las proyecciones y componentes principales
+def entrenar(folder="normalized_data", k=5):
+    """
+    Entrena el sistema con 5 imagenes de la carpeta normalized_data
+    Regresa: mean_face, vt (componentes principales), proyecciones
+    """
+    print("=" * 60)
+    print("INICIANDO ENTRENAMIENTO")
+    print("=" * 60)
+    
+    img = 60 * 90
+    vectores = []
+    contador = 0
+    
+    # Procesar solo las primeras 5 imagenes de la carpeta
+    print(f"\nProcesando imagenes de entrenamiento desde: {folder}")
+    
+    for filename in os.listdir(folder):
+        if contador >= 5:
+            break
+            
+        if filename.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
+            ruta_imagen = os.path.join(folder, filename)
+            print(f"  - {filename}")
+            
+            # Lee la imagen en escala de grises
+            img_data = cv2.imread(ruta_imagen, cv2.IMREAD_GRAYSCALE)
+            if img_data is None:
+                continue
+            
+            # Convertir a vector normalizado (0.0–1.0)
+            vector = img_data.astype(np.float32) / 255.0
+            row = vector.flatten()
+            
+            vectores.append(row)
+            contador += 1
+    
+    # Convertir a matriz numpy
+    matrix = np.array(vectores)
+    
+    print(f"\n Total de imágenes de entrenamiento: {matrix.shape[0]}")
+    
+    # Calcular cara promedio y centrar datos
+    mean_face = np.mean(matrix, axis=0)
+    matrix_centered = matrix - mean_face
+    
+    # Aplicar SVD
+    print("\n Aplicando SVD...")
+    u, sig, vt = matriz_svd(matrix_centered)
+    
+    # Proyectar al espacio PCA con k componentes
+    proy = np.dot(matrix_centered, vt[:k, :].T)
+    
+    print(f"\n Entrenamiento completado con {k} componentes principales")
+    print("PROYECCIONES DE ENTRENAMIENTO:")
+    print(proy)
+    
+    return mean_face, vt, proy
+
+
+# Funcion de prediccion: usa vecino mas cercano para identificar sujeto
+def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.5):
+    """
+    Predice si la imagen de prueba pertenece al mismo sujeto
+    Regresa: distancia_minima, es_aceptado
+    """
+    print("\n" + "=" * 60)
+    print("INICIANDO PREDICCIÓN")
+    print("=" * 60)
+    
+    # Lee y procesa imagen de prueba
+    print(f" Procesando imagen: {ruta_imagen_test}")
+    img = cv2.imread(ruta_imagen_test)
+    if img is None:
+        raise FileNotFoundError(f"Image {ruta_imagen_test} not found!")
+    
+    # Convierte a gris y transforma la imagen a 60*90
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray_resized = cv2.resize(gray, (60, 90))
+    
+    # Convertir a vector normalizado
+    vector_test = gray_resized.astype(np.float32) / 255.0
+    vector_test = vector_test.flatten()
+    
+    # Centrar y proyectar al espacio PCA
+    vector_centrado = vector_test - mean_face
+    proyeccion_test = np.dot(vector_centrado, vt[:k, :].T)
+    
+    print(f"Imagen proyectada al espacio PCA")
+    print(f"Proyección de prueba: {proyeccion_test}")
+    
+    # Buscar el vecino más cercano usando distancia euclidiana
+    distancia_minima = float('inf')
+    
+    print("\n Calculando distancias (vecino más cercano):")
+    for i in range(len(proy_entrenamiento)):
+        # Distancia euclidiana
+        dist = np.linalg.norm(proyeccion_test - proy_entrenamiento[i])
+        print(f"  - Imagen entrenamiento {i+1}: distancia = {dist:.4f}")
+        
+        if dist < distancia_minima:
+            distancia_minima = dist
+    
+    # Decisión basada en umbral
+    es_aceptado = distancia_minima <= umbral
+    
+    print("\n" + "=" * 60)
+    print("RESULTADO")
+    print("=" * 60)
+    print(f"Distancia mínima: {distancia_minima:.4f}")
+    print(f"Umbral de decisión: {umbral:.4f}")
+    
+    if es_aceptado:
+        print(f"ACEPTADO - La imagen pertenece al mismo sujeto")
+    else:
+        print(f"RECHAZADO - La imagen NO pertenece al mismo sujeto")
+    
+    return distancia_minima, es_aceptado
+
+
+# ============================================================================
+# EJEMPLO DE USO
+# ============================================================================
+
+if __name__ == "__main__":
+    
+    # FASE 1: ENTRENAMIENTO
+    # Usa las 5 imagenes de la carpeta normalized_data
+    
+    k_componentes = 5
+    
+    mean_face, vt, proy_entrenamiento = entrenar(folder="normalized_data", k=k_componentes)
+    
+    
+    # FASE 2: PRUEBA
+    # Probar con una imagen nueva
+    
+    imagen_test = "prueba-mala.jpg"
+    umbral = 0.5  # Ajustar según necesidad
+    
+    distancia, aceptado = predecir(
+        imagen_test, 
+        mean_face, 
+        vt, 
+        proy_entrenamiento, 
+        k=k_componentes, 
+        umbral=umbral
+    )
+    
+    print("\n" + "=" * 60)
+    print("RESUMEN FINAL")
+    print("=" * 60)
+    print(f"Distancia mínima: {distancia:.4f}")
+    print(f"Decisión: {'ACEPTADO' if aceptado else 'RECHAZADO'}")
