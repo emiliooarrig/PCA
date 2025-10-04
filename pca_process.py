@@ -282,7 +282,7 @@ if __name__ == "__main__":
     # FASE 2: PRUEBA
     # Probar con una imagen nueva
     
-    imagen_test = "prueba-buena.png"
+    imagen_test = "prueba-mala.png"
     umbral = 0.5  # Ajustar según necesidad
     
     distancia, aceptado = predecir(
