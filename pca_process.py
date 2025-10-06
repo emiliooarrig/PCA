@@ -98,8 +98,17 @@ def matriz_svd(matriz):
     print("\nMatriz V^T:")
     print(VT)
 
-    # Retornamos las tres matrices
-    return U, Sigma, VT
+    # NUEVO: Calcular varianzas explicadas y rango
+    varianzas = (S ** 2) / np.sum(S ** 2)
+    print("\nVarianzas explicadas:")
+    print(varianzas)
+    print(f"Varianza total explicada: {np.sum(varianzas) * 100:.2f}%")
+
+    r = np.sum(S > 1e-10)
+    print(f"Rango de la matriz (r): {r}")
+
+    # Retornamos las tres matrices y valores singulares para pasos posteriores
+    return U, Sigma, VT, S, varianzas
 
 
 # Funcion principal donde se lamman a todas las funciones de
@@ -127,7 +136,7 @@ def proc_matrix(folder):
 
     # Mandar todas las matrices al algoritmo de SVD
     print ("SVD-----------------------------------------")
-    u,sig,vt=matriz_svd(matrix) #ahora podemos usar "svd para conseguir u, sigma y/o vt usando svd(#)"
+    u,sig,vt,S,varianzas=matriz_svd(matrix) 
     matrix_centered = matrix - np.mean(matrix, axis=0)
     #proyeciones principales (producto punto de matrix*s)= vector resultante que se regresa.
     k=5
@@ -144,8 +153,6 @@ def proc_matrix(folder):
 # NUEVAS FUNCIONES PARA ENTRENAMIENTO Y PRUEBA
 # ============================================================================
 
-# Funcion de entrenamiento: procesa 5 imagenes de entrenamiento
-# y regresa las proyecciones y componentes principales
 def entrenar(folder="normalized_data", k=5):
     """
     Entrena el sistema con 5 imagenes de la carpeta normalized_data
@@ -193,7 +200,7 @@ def entrenar(folder="normalized_data", k=5):
     
     # Aplicar SVD
     print("\n Aplicando SVD...")
-    u, sig, vt = matriz_svd(matrix_centered)
+    u, sig, vt, S, varianzas = matriz_svd(matrix_centered)
     
     # Proyectar al espacio PCA con k componentes
     proy = np.dot(matrix_centered, vt[:k, :].T)
@@ -202,10 +209,25 @@ def entrenar(folder="normalized_data", k=5):
     print("PROYECCIONES DE ENTRENAMIENTO:")
     print(proy)
     
+    # Reconstruccion y errores
+
+    # Con esta linea reconstruimos el X_hats
+    X_hat = np.dot(proy, vt[:k, :]) + mean_face
+    # Con esta linea calculamos los errores
+    errores = np.linalg.norm(matrix - X_hat, axis=1)
+    print("\nErrores de reconstrucción:")
+    for i, e in enumerate(errores):
+        print(f"  Imagen {i+1}: error = {e:.6f}")
+
+    # Prueba básica con imágenes de entrenamiento (autocomprobación)
+    print("\nPrueba con imágenes de entrenamiento:")
+    for i in range(len(proy)):
+        dist = np.linalg.norm(proy[i] - proy[i])
+        print(f"  Imagen {i+1}: distancia = {dist:.4f} -> ACEPTADO")
+
     return mean_face, vt, proy
 
 
-# Funcion de prediccion: usa vecino mas cercano para identificar sujeto
 def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.5):
     """
     Predice si la imagen de prueba pertenece al mismo sujeto
@@ -241,7 +263,6 @@ def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.
     
     print("\n Calculando distancias (vecino más cercano):")
     for i in range(len(proy_entrenamiento)):
-        # Distancia euclidiana
         dist = np.linalg.norm(proyeccion_test - proy_entrenamiento[i])
         print(f"  - Imagen entrenamiento {i+1}: distancia = {dist:.4f}")
         
@@ -272,16 +293,12 @@ def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.
 if __name__ == "__main__":
     
     # FASE 1: ENTRENAMIENTO
-    # Usa las 5 imagenes de la carpeta normalized_data
-    
     k_componentes = 5
     
     mean_face, vt, proy_entrenamiento = entrenar(folder="normalized_data", k=k_componentes)
     
     
     # FASE 2: PRUEBA
-    # Probar con una imagen nueva
-    
     imagen_test = "prueba-mala.png"
     umbral = 0.5  # Ajustar según necesidad
     
