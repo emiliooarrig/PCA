@@ -1,64 +1,66 @@
-PROYECTO MEDIO TERMINO
-ALGEBRA LINEAL AVANZADA
+# Proyecto de Medio Término — Álgebra Lineal Avanzada
 
-EMILIO GUZMAN
-FERNANDO REVILLA
+## Integrantes  
+- **Emilio Guzmán**  
+- **Fernando Revilla**
 
-SISTEMA RECONOCIMIENTO FACIAS USANDO ANALISIS DE COMPONENTES PRINCIPALES
+---
 
-Objetivos:
+## Sistema de Reconocimiento Facial usando Análisis de Componentes Principales (PCA)
 
-    conseguir 5 fotos por "persona"
+### Objetivos
+- Obtener **5 fotografías de una persona** para conformar la base de datos.  
+- **Procesar las imágenes automáticamente** para generar datos útiles para el sistema.  
+- **Transformar las imágenes en matrices numéricas** que representen su información visual.  
+- Aplicar **Análisis de Componentes Principales (PCA)** para reducir la dimensionalidad y extraer características relevantes.  
+- Implementar un sistema de **clasificación y reconocimiento facial**, verificando su correcto funcionamiento con pruebas automatizadas.
 
-    procesar las fotos a informacion que pueda ser utilizada por el sistema (automaticamente?)
+---
 
-    transformacion de imagenes a matrices
+## Metodología y Pasos Propuestos
 
-    analisis de componentes y proyecciones
+### 1. Recolección de Datos  
+- Crear carpetas por identidad:  - Incluyendo variaciones en las expresiones faciales en las imágenes:  
 
-    clasificación de imagenes (pruebas de que funciona, automatizado?)
+---
+
+### 2. Preprocesamiento de Imágenes  
+- **Convertir a escala de grises** para simplificar el análisis. Agregandolas a un carpeta con el nombre de `normalized_data`.  
+- **Redimensionar todas las imágenes** a un mismo tamaño (para nuestro sistema usaremos `60x90` ).  
+- **Vectorizar cada imagen:**  
+- Una imagen de tamaño `m×n` se convierte en un vector columna de tamaño `D = m * n`.  
+- **Construir la matriz de datos X:**  
+- Tamaño: `D × N`, donde `N` es el número total de imágenes.  
+- Cada fila representa una imagen vectorizada.  
+
+---
+
+### 3. Cálculo de PCA  
+- Calcular la **matriz de covarianza** y obtener **autovalores y autovectores**.  
+- Ordenar los componentes principales por su **autovalor** (importancia).  
+- Seleccionar los **k componentes principales** que conserven la mayor varianza.
+
+---
+
+### 4. Proyección  
+- **Centrar las imágenes** y proyectarlas en el **subespacio PCA**.  
+- Guardar los **vectores de características** (proyecciones) junto con sus **etiquetas de identidad**.
+
+---
+
+### 5. Clasificación y Reconocimiento  
+- Implementar un método simple de reconocimiento: **Nearest Neighbor (Vecino más cercano)**.  
+- Establecer un **umbral de aceptación** para determinar si una cara pertenece o no a la base de datos, reduciendo falsos positivos.
+
+---
+
+## Resultados Esperados
+- Identificación correcta de rostros previamente registrados.  
+- Visualización de los **autovectores principales (eigenfaces)**.  
+- Gráficas de **varianza explicada** para seleccionar el número óptimo de componentes `k`.  
+
+---
 
 
 
 
-
-Pasos propuestos:
-
-    Recolección de datos
-
-        Reunir carpetas por identidad: data/person1/*.jpg, data/person2/*.jpg, ...
-
-        Incluir variaciones: iluminación, expresión, gafas, ángulos (si es posible).
-
-        Detección ,alineación y recorte de rostros
-
-    Preprocesamiento
-
-        Convertir a escala de grises.
-
-        Redimensionar todas a un mismo tamaño (ej. 112×92, 64×64).
-
-        Normalizar intensidad (Opcional) Aplicar máscara para eliminar fondo irrelevante.
-
-        Vectorizar imágenes
-
-        Cada imagen m×n → vector columna de tamaño D = m*n.
-
-        Construir matriz de datos X de tamaño D × N (N = número total de imágenes). Cada columna = imagen-vector.
-
-        Cálculo de PCA 
-
-        Ordenar componentes por autovalor .
-
-        Elegir k componentes .
-
-    Proyección
-
-        Proyectar las imágenes centradas al subespacio PCA
-        Guardar las proyecciones (vectores de características) y etiquetas.
-
-    Clasificación / Reconocimiento
-
-        Método simple: Nearest Neighbor en espacio PCA (distancia euclidiana o coseno).
-
-        Umbral de aceptación para ver si la cara pertenece a la base de datos (evitar falsos positivos).
