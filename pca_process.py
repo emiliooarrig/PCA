@@ -290,7 +290,12 @@ def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.
 # EJEMPLO DE USO
 # ============================================================================
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
+
+    for i in range(0, 5):
+        nombre_foto = "p" + str(i + 1) + ".png"
+        normalizar(nombre_foto)
+        nombre_foto = ""
     
     # FASE 1: ENTRENAMIENTO
     k_componentes = 5
@@ -299,7 +304,7 @@ if __name__ == "__main__":
     
     
     # FASE 2: PRUEBA
-    imagen_test = "prueba-mala.png"
+    imagen_test = "prueba-persona.png"
     umbral = 0.5  # Ajustar según necesidad
     
     distancia, aceptado = predecir(
