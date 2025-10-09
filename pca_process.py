@@ -1,34 +1,3 @@
-# En este programa se procesan las imagenes
-# para poder ser usadas en test o en train
-
-# Funciones necesarias:
-# --------------------------------------------------
-# pro_image procesa imagenes a vectores
-# (los pasa a escala de grises, reduce su
-# tamaño y lo pasa a vectores)
-
-# vect_process toma los vectores de
-# una persona y hace el analisis de
-# componentes
-# --------------------------------------------------
-
-# funcion regresa imagenes escala de grises (entra imagen 60*90)
-#
-
-# funcion regresa matriz de vectores de grises (entra lista de imagenes grises 60*90)
-#
-
-# funcion regresa componente principal como vector (entra matriz de valores de grises)
-#
-
-# funcion regresa componente principal (entra lista de imagenes png de 60x90)
-#   pasa imagenes a escala de grises
-#   lo pasa a vectores
-#   hace analisis de componentes
-#   encuentra componente principal
-#   imprime y regresa componente principal como vector
-
-
 import numpy as np
 import cv2
 import os
@@ -70,7 +39,7 @@ def imag_Matriz(filename):
     # Convertir a matriz NumPy normalizada (0.0–1.0)
     matrix = img.astype(np.float32) / 255.0
 
-    print(f"✅ Imagen {filename} convertida a matriz con forma {matrix.shape}")
+    print(f" Imagen {filename} convertida a matriz con forma {matrix.shape}")
     return matrix
 
 
@@ -89,21 +58,19 @@ def matriz_svd(matriz):
     print("Matriz original:")
     print(A)
     #VECTORES PROPIOS
-    print("\nMatriz U:")
+    print("\nMatriz U (Ortogonal):")
     print(U)
     #VALORES SINGULARES
     print("\nMatriz Σ (valores singulares):")
     print(Sigma)
     #ORIGINAL X TRANSPUESTA
-    print("\nMatriz V^T:")
+    print("\nMatriz V^T (Transpuesta):")
     print(VT)
 
     # NUEVO: Calcular varianzas explicadas y rango
     varianzas = (S ** 2) / np.sum(S ** 2)
     print("\nVarianzas explicadas:")
     print(varianzas)
-    print(f"Varianza total explicada: {np.sum(varianzas) * 100:.2f}%")
-
     r = np.sum(S > 1e-10)
     print(f"Rango de la matriz (r): {r}")
 
@@ -198,47 +165,46 @@ def entrenar(folder="normalized_data", k=5):
     mean_face = np.mean(matrix, axis=0)
     matrix_centered = matrix - mean_face
     
+    # Imprime la matriz centrada
+    print("\nMatriz Centrada (matrix_centered):")
+    print(matrix_centered) 
+    
     # Aplicar SVD
-    print("\n Aplicando SVD...")
+    print("\n" + "=" * 60)
+    print("SVD")
+    print("=" * 60)
     u, sig, vt, S, varianzas = matriz_svd(matrix_centered)
     
     # Proyectar al espacio PCA con k componentes
     proy = np.dot(matrix_centered, vt[:k, :].T)
     
     print(f"\n Entrenamiento completado con {k} componentes principales")
-    print("PROYECCIONES DE ENTRENAMIENTO:")
+    # Imprimir las proyecciones Z
+    print("Proyecciones Z. ")
     print(proy)
     
     # Reconstruccion y errores
 
     # Con esta linea reconstruimos el X_hats
     X_hat = np.dot(proy, vt[:k, :]) + mean_face
-    # Con esta linea calculamos los errores
-    errores = np.linalg.norm(matrix - X_hat, axis=1)
-    print("\nErrores de reconstrucción:")
-    for i, e in enumerate(errores):
-        print(f"  Imagen {i+1}: error = {e:.6f}")
-
-    # Prueba básica con imágenes de entrenamiento (autocomprobación)
-    print("\nPrueba con imágenes de entrenamiento:")
-    for i in range(len(proy)):
-        dist = np.linalg.norm(proy[i] - proy[i])
-        print(f"  Imagen {i+1}: distancia = {dist:.4f} -> ACEPTADO")
-
+    # Imprime la matriz reconstruida
+    print("\nMatriz Reconstruida (X_gorro):")
+    print(X_hat)
+    
     return mean_face, vt, proy
 
 
 def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.5):
     """
     Predice si la imagen de prueba pertenece al mismo sujeto
-    Regresa: distancia_minima, es_aceptado
+    Regresa: distancia_minima, es_aceptado, error_reconstruccion_test
     """
     print("\n" + "=" * 60)
     print("INICIANDO PREDICCIÓN")
     print("=" * 60)
     
     # Lee y procesa imagen de prueba
-    print(f" Procesando imagen: {ruta_imagen_test}")
+    print(f" Procesando imagen: {ruta_imagen_test} \n")
     img = cv2.imread(ruta_imagen_test)
     if img is None:
         raise FileNotFoundError(f"Image {ruta_imagen_test} not found!")
@@ -253,15 +219,24 @@ def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.
     
     # Centrar y proyectar al espacio PCA
     vector_centrado = vector_test - mean_face
-    proyeccion_test = np.dot(vector_centrado, vt[:k, :].T)
+    proyeccion_test = np.dot(vector_centrado, vt[:k, :].T) 
     
-    print(f"Imagen proyectada al espacio PCA")
     print(f"Proyección de prueba: {proyeccion_test}")
+
+    # CÁLCULO Y IMPRESIÓN DEL ERROR DE RECONSTRUCCIÓN DE PRUEBA 
+    # 1. Reconstruir el vector de prueba (x_hat_test)
+    x_hat_test = np.dot(proyeccion_test, vt[:k, :]) + mean_face
+    
+    # 2. Calcular el error de reconstrucción (norma Euclidiana)
+    error_reconstruccion_test = np.linalg.norm(vector_test - x_hat_test)
+    
+    # Imprimir el error de reconstruccion de prueba
+    print(f"\nError de Reconstrucción (X_gorro): {error_reconstruccion_test:.6f}")
     
     # Buscar el vecino más cercano usando distancia euclidiana
     distancia_minima = float('inf')
     
-    print("\n Calculando distancias (vecino más cercano):")
+    print("\n Distancias (vecino más cercano):")
     for i in range(len(proy_entrenamiento)):
         dist = np.linalg.norm(proyeccion_test - proy_entrenamiento[i])
         print(f"  - Imagen entrenamiento {i+1}: distancia = {dist:.4f}")
@@ -283,15 +258,12 @@ def predecir(ruta_imagen_test, mean_face, vt, proy_entrenamiento, k=5, umbral=0.
     else:
         print(f"RECHAZADO - La imagen NO pertenece al mismo sujeto")
     
-    return distancia_minima, es_aceptado
+    return distancia_minima, es_aceptado, error_reconstruccion_test
 
-
-# ============================================================================
-# EJEMPLO DE USO
-# ============================================================================
 
 if __name__ == "__main__":    
 
+    # Normalizar las imagenes antes de empezar el entrenamiento
     for i in range(0, 5):
         nombre_foto = "p" + str(i + 1) + ".png"
         normalizar(nombre_foto)
@@ -304,10 +276,11 @@ if __name__ == "__main__":
     
     
     # FASE 2: PRUEBA
-    imagen_test = "prueba-persona.png"
-    umbral = 0.5  # Ajustar según necesidad
+    imagen_test = "prueba-similar.png"
+    # Ajustar el umbral dependiendo la prueba
+    umbral = 0.9  
     
-    distancia, aceptado = predecir(
+    distancia, aceptado, error_test = predecir(
         imagen_test, 
         mean_face, 
         vt, 
@@ -320,4 +293,5 @@ if __name__ == "__main__":
     print("RESUMEN FINAL")
     print("=" * 60)
     print(f"Distancia mínima: {distancia:.4f}")
+    print(f"Error de Reconstrucción (Test): {error_test:.6f}")
     print(f"Decisión: {'ACEPTADO' if aceptado else 'RECHAZADO'}")
